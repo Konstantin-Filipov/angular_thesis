@@ -10,11 +10,17 @@ const API_URL = "http://localhost:5000/contacts"
   providedIn: 'root'
 })
 export class ContactsApiService {
+  //state for all contacts
+  private contactsSubject = new BehaviorSubject<any[]>([]);//create behaviour subject 
+  contacts$ = this.contactsSubject.asObservable(); //set an observable
 
-  private contactSubject = new BehaviorSubject<any[]>([]);//create behaviour subject 
-  contacts$ = this.contactSubject.asObservable(); //set an observable
+  //state fot current contact
+  private currentContactSubject = new BehaviorSubject<any | null>(null);
+  currentContact$ = this.currentContactSubject.asObservable()
 
   constructor() { }
+
+
 
   async getContacts() {
     try {
@@ -26,7 +32,7 @@ export class ContactsApiService {
       console.log("Retrieved contacts:", contacts);//simple log to check array
 
       //update the state using behaviour subject
-      this.contactSubject.next(contacts);
+      this.contactsSubject.next(contacts);
 
       console.log("retrieval of data- successful")
       return contacts;
@@ -35,44 +41,45 @@ export class ContactsApiService {
       throw error;
     }
   }
-  // constructor(private contactStateService: ContactStateService) { }
 
-  // async getAllContacts(): Promise<void> {
-  //   try {
-  //     const resp = await axios.get(API_URL);
-  //   } catch (error) {
-  //     console.error('Error getting contacts:', error);
-  //     throw error;
-  //   }
-  // }
+  setCurrentContact(contact: any | null) {
+    this.currentContactSubject.next(contact);
+  }
 
-  // async addContact(contactData: any): Promise<void> {
-  //   try {
-  //     const response = await axios.post(API_URL, contactData);
-  //     this.contactStateService.addContact(response.data);
-  //   } catch (error) {
-  //     console.error('Error adding contact:', error);
-  //     throw error;
-  //   }
-  // }
 
-  // async updateContact(id: any, contactData: any): Promise<void> {
-  //   try {
-  //     const response = await axios.put(`${API_URL}/${id}`, contactData);
-  //     this.contactStateService.updateContact(response.data);
-  //   } catch (error) {
-  //     console.error('Error updating contact:', error);
-  //     throw error;
-  //   }
-  // }
+  async addContact(contactData: any): Promise<void> {
+    try {
+      const response = await axios.post(API_URL, contactData);
+      this.contactsSubject.next([...this.contactsSubject.value, response.data]);
+    } catch (error) {
+      console.error('Error adding contact:', error);
+      throw error;
+    }
+  }
 
-  // async deleteContact(id: any): Promise<void> {
-  //   try {
-  //     await axios.delete(`${API_URL}/${id}`);
-  //     this.contactStateService.deleteContact(id);
-  //   } catch (error) {
-  //     console.error('Error deleting contact:', error);
-  //     throw error;
-  //   }
-  // }
+  async updateContact(id: any, contactData: any): Promise<void> {
+    try {
+      const response = await axios.put(`${API_URL}/${id}`, contactData);
+      const updatedContacts = this.contactsSubject.value.map((contact) =>
+        contact._id === id ? response.data : contact
+      );
+      this.contactsSubject.next(updatedContacts);
+    } catch (error) {
+      console.error('Error updating contact:', error);
+      throw error;
+    }
+  }
+
+  async deleteContact(id: any): Promise<void> {
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      const updatedContacts = this.contactsSubject.value.filter(
+        (contact) => contact._id !== id
+      );
+      this.contactsSubject.next(updatedContacts);
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      throw error;
+    }
+  }
 }
