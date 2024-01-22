@@ -1,0 +1,14 @@
+<div class="contact-item" >
+  <div class="contact-name">{{ contact.firstName }} {{ contact.lastName }}</div>
+  <div class="contact-detail">Email: {{ contact.email }}</div>
+  <div class="contact-detail">Phone: {{ contact.phoneNumber }}</div>
+
+  <div *ngIf="contact.address" class="contact-address">
+    <div>Address: {{ contact.address.street }}, {{ contact.address.city }}</div>
+    <div>{{ contact.address.state }}, {{ contact.address.zipCode }}</div>
+    <div>{{ contact.address.country }}</div>
+  </div>
+
+  <button (click)="handleEdit()">Edit</button>
+  <button (click)="handleDelete()">Delete</button>
+</div>

@@ -1,0 +1,15 @@
+<h2>Contacts list</h2>
+<div className="contact-list">
+    <div class="contact-list">
+        <app-contact-item *ngFor="let contact of contacts" [contact]="contact"></app-contact-item>
+    </div>
+</div>
+<!-- 
+<div className="contact-list">
+    <app-contact-item *ngFor="let contact of contacts.slice(0, visibleCount); let i = index"
+        [key]="contact._id"
+        [contact]="contact"
+        [ref]="i + 1 === visibleCount ? lastContactElementRef : null"
+    ></app-contact-item>
+</div> -->
+
